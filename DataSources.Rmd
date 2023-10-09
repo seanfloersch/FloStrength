@@ -1,0 +1,35 @@
+---
+title: "Data Sources"
+output:
+    prettydoc::html_pretty:
+    theme: hpstr
+    toc: TRUE
+---
+
+<center>
+
+A variety of data sources are used in the creation of the FloStrength variables, dataframes, and predictions. These websites and databases that were used typically have a larger extent of data and up-to-the-minute reports and scores available as well. 
+
+[Sports Reference](https://www.sports-reference.com)
+
+Used to gather historical data and current data to create personal variables
+
+[ESPN](https://www.espn.com)
+
+Used to get sports results and games being played 
+
+
+[CBS Sports](https://www.cbssports.com)
+
+Used to get sports results and games being played 
+
+[SportsLine](https://seanfloersch.shinyapps.io/FloStrengthHistory/)
+
+Used to get book odds that are used in modelling and bets
+
+[Massey Ratings](https://seanfloersch.shinyapps.io/FloStrengthHistory/)
+
+Used to get conference ratings for college sports
+
+
+

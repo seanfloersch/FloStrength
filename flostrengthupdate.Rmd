@@ -1,0 +1,342 @@
+---
+title: "FloStrengthUpdate"
+author: "Sean Floersch"
+date: "`r Sys.Date()`"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(rvest)
+library(tidyverse)
+library(optmatch)
+library(stringr)
+library(ggplot2)
+library(e1071)
+library(rpart)
+library(randomForest)
+library(caret)
+library(gridExtra)
+library(gbm)
+library(neuralnet)
+library(reactable)
+library(DT)
+
+isMLBtoday="yes"
+wasMLByest="yes"
+ncaabtod = "no"
+ncaabyest = "no"
+isthereNBAtoday <- "no"
+wasthereNBAyesterday <- "no"
+isNHLtoday <- "no"
+wasNHLyest <- "no"
+NFLSZN="Yes"
+nflweek = 5 ## update on thursdayy
+cfweek = 1 ## update on Tuesday
+dayofweek <- date() %>% str_extract("[A-Z][a-z]{1,3}")
+```
+
+```{r mlb}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/MLBFunctions.R")
+  yest=getyestDate()
+  today=getDate()
+
+if (isMLBtoday=="yes"){
+  today=getDate()
+  yest=getyestDate()
+}
+if (wasMLByest =="yes"){
+  MLBGames<- unique(getMLBResults(yest))
+  #Hitters<-getMLBHitters()
+  #Pitchers<-getMLBPitchers()
+  Hitters<- read.csv("/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Hitters.csv")
+  Pitchers<- read.csv("/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Pitchers.csv")
+}else{
+  MLBGames<- read.csv("/Users/seanfloersch/FloStrength/MLBFloStrength/MLBGames2023")
+  Hitters<- read.csv("/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Hitters.csv")
+  Pitchers<- read.csv("/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Pitchers.csv")
+}
+  MLBTeams = getMLBTeam(Hitters,Pitchers,MLBGames)
+  mlbmvp<-Hitters%>%
+    select(Name, Team, FloValue)
+  mlbmvp1<-Pitchers%>%
+    select(Name, Team, FloValue)
+  mlbmvp<-rbind(mlbmvp,mlbmvp1)%>%
+    group_by(Name,Team)%>%
+    mutate(FloValue=round(sum(FloValue),2))%>%
+    slice(1)%>%
+    ungroup%>%
+    arrange(-FloValue)
+write_csv(Hitters,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Hitters.csv" )
+write_csv(Pitchers,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/Pitchers.csv" )
+write_csv(Hitters,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLBHitters" )
+write_csv(Pitchers,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLBPitchers")
+write_csv(MLBTeams,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/MLB/TeamMaster.csv" )
+if(wasMLByest=="yes"){
+  updMLBModel(yest)
+  updMLBModelRes(yest)
+  updMLBBets(yest)
+}
+if(isMLBtoday=="yes"){
+  MLBPredGames<-predMLBToday(today)
+  write_csv(MLBPredGames,"/Users/seanfloersch/FloStrength/MLBFloStrength/yestmoddf")
+  predMLBModel(today)
+}
+```
+
+```{r nfl}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/NFLFunctions.R")
+if(NFLSZN=="Yes"){
+  sched<-getSchedule(2023)
+  Results<-sched %>%filter(PtsW!= "")
+  write_csv(Results,"/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/NFL2023Results.csv")
+  getNFLPlayers()
+  getNFLTeam()
+  NFLPowerRank <- read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/TeamMaster2023.csv") %>% 
+    mutate(Rating = .2*FloPlayer + .3* FloSched + .5* FloTeam) %>%
+    arrange(-Rating) %>%
+    mutate(Rank = c(1:32)) %>%
+    select(Rank, Team, Rating,"PlayerRating"=FloPlayer,"TeamRating"=FloTeam,"SchedRating"=FloSched)
+  teamsnfl <- read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/TeamMaster2023.csv") 
+  write_csv(teamsnfl,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/TeamMaster.csv")
+  write_csv(NFLPowerRank,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/PowerRank.csv")
+  rb<-read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/RB2023.csv")
+  qb<-read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/QB2023.csv")
+  wr<-read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/WR2023.csv")
+  def<-read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFL2023/DEF2023.csv")
+  write_csv(rb,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/rb.csv")
+  write_csv(qb,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/qb.csv")
+  write_csv(wr,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/wr.csv")
+  write_csv(def,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NFL/def.csv")
+}
+## update previous week
+if (dayofweek == "Thursss"){
+  nflmaster <- get_nfl_team(NFLResults)
+  write_csv(nflmaster,"/Users/seanfloersch/FloStrength/NFLFloStrength/NFLPlayerPred/nflmaster22")
+  powerrank <- read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFLPlayerPred/nflmaster22") %>% 
+    mutate(Rating = .2*FloPlayer + .3* FloSched + .5* FloTeam + 0*fspred) %>%
+    arrange(-Rating) %>%
+    mutate(Rank = c(1:32)) %>%
+    select(Rank, Team, Rating,"PlayerRating"=FloPlayer,"TeamRating"=FloTeam,"SchedRating"=FloSched,"PredRating"=fspred)
+  write_csv(powerrank,"/Users/seanfloersch/FloStrength/FloStrengthApp/NFLPowerRank")
+  getNFLPlayers()
+  getNFLModSuc()
+}
+## predict week
+if (dayofweek == "Friii"){
+  nflmaster <- read.csv("/Users/seanfloersch/FloStrength/NFLFloStrength/NFLPlayerPred/nflmaster22")
+  predweek <- pred_current_week(nflweek, nflmaster)
+  write_csv(predweek, "/Users/seanfloersch/FloStrength/NFLFloStrength/NFLPlayerPred/nflprevweekdf")
+  cleanweek <- clean_week_pred(predweek)
+  mldf <- mlpred(predweek)
+  write_csv(mldf, "/Users/seanfloersch/FloStrength/NFLFloStrength/NFLPlayerPred/nflMLpredict")
+  predNFLBets()
+}
+ detach("package:plyr", unload = TRUE)
+```
+
+```{r nba}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/NBAFunctions.R")
+  yestgameID <- getyestDate(x)
+
+if (wasthereNBAyesterday == "yes"){
+  NBAResults <- updateNBAyest(yestgameID) %>% na.omit
+  NBAResults <- unique(NBAResults)
+  write_csv(NBAResults, "/Users/seanfloersch/FloStrength/NBAFloStrength/ComNBAResults")
+  NBAModel <- updateNBAmod(NBAResults) %>% na.omit
+  NBAModel <- unique(NBAModel)
+  write_csv(NBAModel, "/Users/seanfloersch/FloStrength/NBAFloStrength/NBAModel")
+  NBABets <-read.csv("/Users/seanfloersch/FloStrength/NBAFloStrength/nbayestbetdf")
+  if (length(NBABets$Game)>0){
+    NBABetsDF <- unique(updateNBAbets(NBABets, NBAResults))
+    write_csv(NBABetsDF, "/Users/seanfloersch/FloStrength/NBAFloStrength/NBABetsDF")
+  }
+}
+NBAResults<-read.csv("/Users/seanfloersch/FloStrength/NBAFloStrength/ComNBAResults")
+NBAPlayers <- getNBAplayers(2023)
+NBAMVP <- NBAPlayers %>% 
+  select(Player, Tm, Pos,Scoring, Passing, Rebounding, Defense, FloStrength, Value) %>%
+  mutate(Scoring = round(Scoring,3))%>%
+  mutate(Passing = round(Passing,3))%>%
+  mutate(Rebounding = round(Rebounding,3))%>%
+  mutate(Defense = round(Defense,3))%>%
+  mutate(FloStrength = round(FloStrength,3))%>%
+  mutate(Value = round(Value,3))
+NBATeams <- getNBATeam(2023)
+NBASched <- getNBAsched(NBATeams,NBAResults)
+NBAStreaks <- getStreaks(NBATeams, NBAResults)
+PowerRanking <- getNBArank(NBAPlayers, NBATeams, NBASched, NBAPredTeam,NBAStreaks)
+NBAPR <- PowerRanking %>% 
+  mutate(Rating = Rank) %>% 
+  mutate(Rank = c(1:30)) %>% 
+  mutate(TeamStrength = round(TeamStrength,3))%>%
+  mutate(PlayerStrength = round(PlayerStrength,3))%>%
+  mutate(SchedRating = round(SchedRating,3))%>%
+  mutate(PredRating = round(PredRating,3))%>%
+  mutate(Rating = round(Rating,3))
+write_csv(NBAMVP,"/Users/seanfloersch/FloStrength/FloStrengthApp/NBAMVPRank")
+write_csv(NBAPR,"/Users/seanfloersch/FloStrength/FloStrengthApp/NBAPowerRank")
+write_csv(NBAPlayers,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/NBAPlayers")
+
+if (isthereNBAtoday == "yes"){
+  todgameID <- getDate(x)
+  predToday <- predictNBAtoday(PowerRanking, todgameID)
+  write_csv(predToday, "/Users/seanfloersch/FloStrength/NBAFloStrength/yestmodpred")
+  NBAtodaydf <- predToday %>% 
+    select(AwayTeam,HomeTeam,gameID,BookWin,logpred, rfpred, gbmpred, nnpred, svmpred) %>%
+    mutate(GbmWin = ifelse(gbmpred ==1,AwayTeam,HomeTeam)) %>%
+    mutate(RfWin = ifelse(rfpred ==1,AwayTeam,HomeTeam)) %>%
+    mutate(NnWin = ifelse(nnpred ==1,AwayTeam,HomeTeam)) %>%
+    mutate(LogWin = ifelse(logpred ==1,AwayTeam,HomeTeam)) %>%
+    mutate(SvmWin = ifelse(svmpred ==1,AwayTeam,HomeTeam)) %>%
+    mutate(Game = str_c(AwayTeam, " @ ", HomeTeam, sep = ""))%>%
+    select(Game, BookWin, LogWin, NnWin, SvmWin, RfWin, GbmWin)
+  predictNBABets()
+}
+```
+
+``` {r nhl}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/NHLFunctions.R")
+library(plyr)
+if (wasNHLyest == "yes"){
+  yestdate <- getyestDate(x)
+  NHLGames <- unique(getNHLResults(yestdate))
+  write_csv(NHLGames, "/Users/seanfloersch/FloStrength/NHLFloStrength/NHLGames2223")
+  
+  NHLModdf <- unique(updYestNHL(NHLGames, yestdate))
+  write_csv(NHLModdf, "/Users/seanfloersch/FloStrength/NHLFloStrength/NHLModelComp")
+  yestbetsNHL <- read.csv("/Users/seanfloersch/FloStrength/NHLFloStrength/NHLmodpredyest")
+  if (length(yestbetsNHL$Game)>0){
+    NHLBetDF <- unique(updNHLBets(NHLModdf,yestdate, yestbetsNHL))
+    write_csv(NHLBetDF, "/Users/seanfloersch/FloStrength/NHLFloStrength/NHLBetsDF")
+  }
+} else {
+  NHLModdf <- read.csv("/Users/seanfloersch/FloStrength/NHLFloStrength/NHLModelComp")
+  NHLGames <- read.csv("/Users/seanfloersch/FloStrength/NHLFloStrength/NHLGames2223")
+}
+NHLPlayers <- getNHLPlayer(x)
+#NHLMaster <- getNHLMaster(NHLGames, NHLPlayers)
+NHLMaster<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthApp/NHLPowerRank")%>%select(-Rank)
+if (isNHLtoday == "yes"){
+  toddate <- getDate(x)
+  NHLPredTod <- getNHLPredictions(toddate,NHLMaster)
+  write_csv(NHLPredTod, "/Users/seanfloersch/FloStrength/NHLFloStrength/NHLPredyest")
+  NHLmodpred <- predictNHLModel(NHLPredTod, toddate)
+  write_csv(NHLmodpred, "/Users/seanfloersch/FloStrength/NHLFloStrength/NHLmodpredyest")
+} else{
+  print("No NHL Games Today")
+}
+NHLMVP<- NHLPlayers %>%
+  arrange(-Value) %>%
+  mutate(FloStrength = round(FloStrength,3))%>%
+  mutate(PtScore = round(PtScore,3))%>%
+  mutate(DefScore = round(DefScore,3))%>%
+  mutate(ShotScore = round(ShotScore,3))%>%
+  mutate(Value = round(Value,3))
+write_csv(NHLMVP,"/Users/seanfloersch/FloStrength/FloStrengthApp/NHLMVP")
+NHLPR <- NHLMaster %>%
+  arrange(-FloStrength) %>%
+  mutate(Rank = c(1:32))
+write_csv(NHLPR,"/Users/seanfloersch/FloStrength/FloStrengthApp/NHLPowerRank")
+
+```
+
+```{r ncaamb}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/NCAAMBFunctions.R")
+if (ncaabyest == "yes"){
+  yestdate <- getyestDate(x)
+  NCAAMBResultsDF <- updateNCAAMBResults(yestdate)
+  write_csv(NCAAMBResultsDF, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/NCAAMBResultsDF")
+  NCAAMBModDF<-updateNCAAMBModDF(NCAAMBResultsDF,yestdate)
+  write_csv(NCAAMBModDF, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/NCAAMBModDF")
+  BetDF<- updateBetDf(NCAAMBModDF,yestdate)
+  write_csv(BetDF, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/BetDFncaamb")
+} else{
+  NCAAMBResultsDF<- read.csv("/Users/seanfloersch/FloStrength/NCAAMBFloStrength/NCAAMBResultsDF")
+  NCAAMBModDF<- read.csv("/Users/seanfloersch/FloStrength/NCAAMBFloStrength/NCAAMBModDF")
+  BetDF<- read.csv("/Users/seanfloersch/FloStrength/NCAAMBFloStrength/BetDFncaamb")
+}
+if (ncaabtod == "yes"){
+  toddate <- getDate(x)
+  ncaab <- getNCAAMBTeam(NCAAMBResultsDF)
+  write_csv(ncaab, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/ncaambmaster")
+  ncaambpred <- predictNCAAMBgames(toddate, ncaab)
+write_csv(ncaambpred, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/NCAAMByestpred")
+games2watch <- predModelNCAAMB(ncaambpred, todgameID)
+write_csv(games2watch, "/Users/seanfloersch/FloStrength/NCAAMBFloStrength/games2watchyest")
+} else {
+  ncaab<- read.csv("/Users/seanfloersch/FloStrength/NCAAMBFloStrength/ncaambmaster")
+}
+TOP25 <- ncaab %>%
+  mutate(Record = str_c(W,L, sep = "-")) %>%
+  select(Team, Record, TmRating) %>%
+  arrange(-TmRating) %>%
+  mutate(TmRating = round(TmRating,3))
+write_csv(TOP25,"/Users/seanfloersch/FloStrength/FloStrengthApp/NCAAMBPowerRank")
+```
+
+```{r soccer}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/SoccerFunctions.R")
+df<-getSoccerRanks()
+write_csv(df,"/Users/seanfloersch/FloStrength/FloStrengthCurrent/Soccer/TeamMaster.csv")
+df<-getSoccerPlayerRanks(df)
+```
+
+```{r cfb}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/CFB/CFBFunctions.R")
+NCAAFMaster <- getNCAAFTeam(x)
+sosdf <- getSOS(NCAAFMaster,5)
+NCAAFMaster1 <- left_join(NCAAFMaster, sosdf, by = "Team") %>%
+  mutate(FloStrength = -.1+(TeamRating + SchedRating)/2) %>%
+  arrange(-FloStrength)
+write_csv(NCAAFMaster1, "/Users/seanfloersch/FloStrength/FloStrengthCurrent/CFB/TeamMaster.csv")
+```
+
+```{r dailybets, warning=FALSE, include=FALSE, echo=FALSE,message=FALSE }
+mlb<- read.csv("/Users/seanfloersch/FloStrength/MLBFloStrength/mlbbestbetsHist")
+
+betdf <- mlb
+write_csv(betdf, "/Users/seanfloersch/FloStrength/FloStrengthFuture/Betting/BetHistory.csv")
+
+nba <- read.csv("/Users/seanfloersch/FloStrength/NBAFloStrength/nbayestbetdf") %>%
+  mutate(Sport = "NBA") %>%
+  select(Sport,Game, BookWin, Spread, Bet, Earnings)
+ncaa <-read.csv("/Users/seanfloersch/FloStrength/NCAAMBFloStrength/games2watchyest")%>%
+  mutate(Sport = "NCAAMB") %>%
+  mutate(type = as.numeric(Bet)) %>%
+  mutate(Earnings = ifelse(is.na(type)==TRUE, (exp(abs(spread))^.125),.91)) %>%
+  mutate(Earnings=round(Earnings,2)) %>%
+  select(Sport,Game, BookWin, "Spread"="spread", Bet, Earnings)
+nhl <- read.csv("/Users/seanfloersch/FloStrength/NHLFloStrength/NHLmodpredyest") %>%
+  mutate(Sport = "NHL") %>%
+  select(Sport,Game, BookWin, "Spread"="BookSpread", Bet, Earnings)
+mlb <- read.csv("/Users/seanfloersch/FloStrength/MLBFloStrength/mlbbestbetsyest") %>%
+  mutate(Sport = "MLB") %>%
+  mutate(Game=str_c(AwayTeam, " @ ",HomeTeam))%>%
+  mutate(Spread=1.5)
+#betdf<- rbind(nba,ncaa,nhl,mlb)%>%
+betdf<-mlb
+if (isNHLtoday=="no"){
+  betdf<-betdf %>%
+    filter(Sport!="NHL")
+}
+if (isthereNBAtoday=="no"){
+  betdf<-betdf %>%
+    filter(Sport!="NBA")
+}
+if (ncaabtod=="no"){
+  betdf<-betdf %>%
+    filter(Sport!="NCAAMB")
+}
+if (isMLBtoday=="no"){
+  betdf<-betdf %>%
+    filter(Sport!="MLB")
+}
+write_csv(betdf,"/Users/seanfloersch/FloStrength/FloStrengthApp/todaybets")
+```
+
+```{r}
+x<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthApp/todaybets")
+write_csv(x, "/Users/seanfloersch/FloStrength/FloStrengthFuture/Betting/TodayBets.csv")
+
+```

@@ -1,0 +1,60 @@
+---
+title: "FloStrength Sports"
+author: "Sean Floersch"
+output:
+    prettydoc::html_pretty:
+    theme: hpstr
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(rvest)
+library(tidyverse)
+library(optmatch)
+library(stringr)
+library(reactable)
+```
+
+<center>
+
+# FloStrength Sports Analysis
+
+#### Choose whether you would like to look at the past, at today, or look into the future
+
+<div style="width:500px; height:230px">
+
+[![HistoryImg](/Users/seanfloersch/FloStrength/FloStrengthApp/img/historysports.png){width=30%}](https://seanfloersch.shinyapps.io/FloStrengthHistory/){target="_blank"}[![CurrentImg](/Users/seanfloersch/FloStrength/FloStrengthApp/img/currentsports.png){width=30%}](https://seanfloersch.shinyapps.io/FloStrengthCurrent/){target="_blank"}[![FutureImg](/Users/seanfloersch/FloStrength/FloStrengthApp/img/futuresports.png){width=30%}](https://seanfloersch.shinyapps.io/FloStrengthFuture/){target="_blank"}
+[Historical](https://seanfloersch.shinyapps.io/FloStrengthHistory/){target="_blank"}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;[Current](https://seanfloersch.shinyapps.io/FloStrengthCurrent/){target="_blank"}&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;[Future](https://seanfloersch.shinyapps.io/FloStrengthFuture/){target="_blank"}
+
+
+#### Sports Blog
+
+<center>
+
+[![BlogImg](/Users/seanfloersch/FloStrength/FloStrengthApp/img/sportsblog.jpeg){width=50%}](https://flostrengthsports.blogspot.com)
+
+#### Want to learn how the formulas were produced?
+
+<a href="https://rpubs.com/seanfloersch/flostrengthsports-datasources" target="_blank">Data Sources</a>&emsp;&emsp; <a href="https://rpubs.com/seanfloersch/flostrength-formulas" target="_blank">Formulas</a>&emsp;&emsp; <a href="https://github.com/seanfloersch/FloStrengthSports" target="_blank">GitHub</a> 
+
+<center>
+
+# About Sean Floersch 
+
+### Download Resume
+
+<a href="https://github.com/seanfloersch/FloStrengthSports/blob/main/Resume_Sean_Floersch_Feb2023.pdf" target="_blank">Floersch_Sean_Resume_UpdFeb23</a> 
+
+### Learn more about me
+
+<a href="https://rpubs.com/seanfloersch/AboutSean" target="_blank">About Page</a>  
+
+### Follow my Socials
+Instagram: <a href="https://www.instagram.com/seanfloersch/?hl=en" target="_blank">@seanfloersch</a> 
+
+LinkedIn: <a href="https://www.linkedin.com/in/sean-floersch-19258a243/" target="_blank">@sean-floersch</a> 
+
+Facebook: <a href="https://www.facebook.com/sean.floersch" target="_blank">@sean.floersch</a> 
+

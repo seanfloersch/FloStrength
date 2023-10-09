@@ -1,0 +1,616 @@
+---
+title: 'The Underdog Story: How two Florida teams went from 8th seeds to finals births'
+author: "Sean Floersch"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(rvest)
+df <- data.frame(value = c(99.99,.001),
+                 Group = c("Drafted","Undrafted"))
+hsize=1
+df <- df %>% 
+  mutate(x = hsize)
+
+a<-ggplot(df, aes(x = hsize, y = value, fill = Group)) +
+  geom_col() +
+  coord_polar(theta = "y") +
+  xlim(c(0.2, hsize + 0.5)) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank())+
+  scale_fill_manual(values = c("blue", "orange","#74A9CF", "#0570B0"))+
+  labs(title="NY Knicks")
+df <- data.frame(value = c(60,44.4),
+                 Group = c("Drafted","Undrafted"))
+hsize=1
+df <- df %>% 
+  mutate(x = hsize)
+
+b<-ggplot(df, aes(x = hsize, y = value, fill = Group)) +
+  geom_col() +
+  coord_polar(theta = "y") +
+  xlim(c(0.2, hsize + 0.5)) +
+  theme(panel.background = element_rect(fill = "white"),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank())+
+  scale_fill_manual(values = c("red", "black","#74A9CF", "#0570B0"))+
+  labs(title="Miami Heat")
+library(gridExtra)
+grid.arrange(a, b, ncol=2)
+
+
+```
+
+# Introduction
+
+As the calendar flips from May to June, sports fans are treated to not one, but two championship series. Although the first signs of the summer humidity and hot sun typically are signs of the baseball season, these also signify the end of the NBA and NHL seasons. For fans situated in the Miami beach area, the last two months have been a whirlwind, cumulating in a pair of championship births from the lowest seeds in the playoffs. 
+
+# The 2022 Season
+
+To fully grasp how the Miami Heat and Florida Panthers started this run, you have to go back to the previous season. Following the end of the 2021-2022 NBA and NHL seasons, the Heat and Panthers were sitting pretty as the top seeds in the playoffs. 
+
+## The Miami Heat
+
+The Miami Heat came into the 2021-2022 season fresh off a first round exit to the eventual champion Bucks and looked to get back to the ways of the previous season, where they made their first NBA Finals appearance in the post-LeBron era. And in all honesty, they did just that. The Heat balanced solid offense with great defense to the one seed in the East and the second highest FloStrength in the conference as well, second to only the Boston Celtics whom they would end up losing to in the Eastern Conference Finals. 
+
+```{r, echo=FALSE}
+nba22<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NBATeamsAT")%>%
+  filter(yearID==2022)%>%
+  mutate(is.flo=ifelse(Team=="Miami Heat",1.5,1))
+nba22players<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NBAPlayersAT")%>%
+  filter(yearID==2022)%>%
+  arrange(-Value)%>%
+  group_by(Pos)%>%
+  mutate(PosRank=c(1:length(Name)))%>%
+  ungroup%>%
+  mutate(OvrRank=c(1:length(Name)))%>%
+  filter(Tm=="MIA")%>%
+  select(Name,Pos, Scoring, Defense, Value, PosRank,OvrRank)
+ggplot(data = nba22,aes(x=reorder(Team, -FloStrength),y=FloStrength,fill=is.flo))+geom_col()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+xlab("Team")+labs(title="FloStrength of 2022 NBA Teams")
+ggplot(data = nba22,aes(x=Scoring,y=Defense,col=is.flo,size=is.flo))+geom_point()+
+  theme(legend.position="none")+xlab("Team")+labs(title="Scoring vs Defense of 2022 NBA Teams")+
+  geom_vline(xintercept = 0)+
+  geom_hline(yintercept = 0)
+```
+
+Going into the off-season, Chicago native Jimmy Butler promised that the next year would not finish the same way, declaring that the team that had been formed was strong enough to compete for the championship. Critics were quick to point out the lack of depth that could have played a part in the the team's eventual demise. Outside of All-Stars Butler and Bam Adebayo, the Heat team relied heavily on Tyler Herro for scoring, and an aging Kyle Lowry and undrafted players Gabe Vincent, Duncan Robinson, Max Strus, and Caleb Martin to round out the rotation. It felt like if Miami wanted to beat the Bucks and Celtics atop the Eastern Conference, they would need to add a 3rd star or more pieces around their core.
+
+```{r,echo=FALSE}
+nba22players<-nba22players%>%
+  mutate(Scoring=round(Scoring,2))%>%
+  mutate(Defense=round(Defense,2))%>%
+  mutate(Value=round(Value,2))
+kable(nba22players)
+nba22players<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NBAPlayersAT")%>%
+  filter(yearID==2022)%>%
+  mutate(is.flo=ifelse(Tm=="MIA",1.5,1))
+ggplot(data = nba22players,aes(x=Scoring,y=Defense,col=is.flo,size=is.flo))+geom_point()+
+  theme(legend.position="none")+xlab("Scoring")+labs(title="FloStrength of 2022 NBA Players ")+
+  geom_vline(xintercept = 0)+
+  geom_hline(yintercept = 0)
+```
+
+## The Florida Panthers
+
+The Florida Panthers had arguably the best regular season for any NHL team, finishing with a league leading 122 points and a 58-18-6 record. Their +94 goal differential led by their 340 goals both led the league, as did their .643 FloStrength score and 2.364 Offense rating. 
+
+```{r, echo=FALSE}
+nhl22<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLTeamsAT")%>%
+  filter(yearID==2022)%>%
+  mutate(is.flo=ifelse(Team=="FLA",1.5,1))
+nhl22players<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLPlayersAT")%>%
+  filter(yearID==2022)
+ggplot(data = nhl22,aes(x=reorder(Team, -FloStrength),y=FloStrength,fill=is.flo))+geom_col()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+xlab("Team")+labs(title="FloStrength of 2022 NHL Teams")
+ggplot(data = nhl22,aes(x=Offense,y=Defense,col=is.flo,size=is.flo))+geom_point()+
+  theme(legend.position="none")+xlab("Team")+labs(title="FloStrength of 2022 NHL Teams")+
+  geom_vline(xintercept = 0)+
+  geom_hline(yintercept = 0)
+```
+
+This regular season success did not translate well to the playoffs, where a second round sweep to their inner-state rival Tampa Bay Lightning left fans wishing for more. Just one more piece, they thought, would push them over the hump. Florida was arguably the deepest team in the league, led by Barkov, Forsling, Ekblad, and Huberdeau. They had an astonishing 7 players in the top 75 most valuable players, the most of any team. However, they lacked the big superstar that could take over when they had their backs against the wall, as none of these 7 players ranked in the top 15. 
+
+```{r,echo=FALSE}
+nhl22players<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLPlayersAT")%>%
+  filter(yearID==2022)%>%
+  group_by(Tm)%>%
+  mutate(DepthRating=median(Value))%>% 
+  ungroup()%>% 
+  arrange(-DepthRating)%>%
+  mutate(is.flo=ifelse(Tm=="FLA",1.5,1))
+ggplot(data = nhl22players,aes(x=reorder(Tm, -DepthRating),y=Value,col=is.flo))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+xlab("Team")+labs(title="Value of 2022 NHL Players by Team")
+```
+fdkahfljas
+
+```{r,echo=FALSE}
+nhl22players<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLPlayersAT")%>%
+  filter(yearID==2022)%>%
+  arrange(-Value)%>%
+  group_by(Pos)%>%
+  mutate(PosRank=c(1:length(Player)))%>%
+  ungroup%>%
+  mutate(OvrRank=c(1:length(Player)))%>%
+  filter(Tm=="FLA")%>%
+  select("Name"=Player,Pos, FloStrength, Value, PosRank,OvrRank)%>%
+  slice(1:10)%>%
+  mutate(Value = round(Value,2))%>%
+  mutate(FloStrength = round(FloStrength,2))
+kable(nhl22players)
+```
+
+
+# The Offseason
+
+## Miami Heat
+
+The Heat, liking where the team was at, kept the core completely intact and ran it back with nearly the same full rotation. Their peripherary additions were misicual, and, in general a negative impact on the team. The team had 9 players from their 2022 playoff run on the roster at the end of the 2023 season, second most to only the Memphis Grizzlies. They added Victor Oladipo and then Kevin Love mid-season, although neither player played a hugely significant role on the team. The game still revolved around Butler and Adebayo, with a large chunk of their rotation remaining undrafted players that were still trying to prove themselves in the NBA. Without valuable additions or subtractions to the roster, the Heat were content running it back, maybe for one last shot at a title run until they needed to go in a different direction if things did not pan out. 
+
+```{r, echo=FALSE,warning=FALSE}
+getNBAplayers <- function(year) {
+  url <- str_c("https://www.basketball-reference.com/leagues/NBA_", year,"_totals.html")
+  h <- read_html(url) 
+  len <- length(html_nodes(h, "td") %>% html_text %>% as.numeric)/29
+  stats <- html_nodes(h, "td") %>% html_text
+  df<- data.frame()
+  for (i in c(1:len)) {
+    for (j in c(1:29)){
+      marker = j + (i -1)* 29
+      df[i,j]<- stats[marker]
+    }
+  }
+  
+  for (i in c(3, 5:29)){
+    df[i] <- as.numeric(unlist(df[i]))
+  }
+  df <- df
+  col <-html_nodes(h, ".center+ .poptip") %>% html_text
+  colnames(df) <- col
+  url <- str_c("https://www.basketball-reference.com/leagues/NBA_", year,"_advanced.html")
+  h <- read_html(url) 
+  stats <- html_nodes(h, "td") %>% html_text
+  dfadv<- data.frame()
+  for (i in c(1:len)) {
+    for (j in c(1:28)){
+      marker = j + (i -1)* 28
+      dfadv[i,j]<- stats[marker]
+    }
+  }
+  for (i in c(3, 5:28)){
+    dfadv[i] <- as.numeric(unlist(dfadv[i]))
+  }
+  col <-html_nodes(h, ".center+ .poptip") %>% html_text
+  colnames(dfadv) <- col
+  dfadv <- dfadv[, c(1,4,7:18, 20:23,25:28)]
+  dfcomp <- left_join(df, dfadv, by = c("Player", "Tm"))%>%
+    mutate(yearID = year)
+  dfcomp <- dfcomp  %>%
+    group_by(Player)%>%
+    mutate(Tm = last(Tm))%>%
+    slice(1)%>%
+    ungroup()%>%
+    mutate(MPG = MP / G) %>%
+    filter(MPG > 12.9 & G > 5) %>%
+    mutate(DWS = DWS / MP) %>%
+    mutate(Pos = str_extract(Pos, "[A-Z]{1,2}")) %>%
+    rename("FG2"="2P","FG2A"="2PA","FG3"="3P","FG3A"="3PA") %>%
+    select(-`eFG%`, -VORP, -`AST%`,-`TOV%`, -`WS/48`, -FTr, -`3PAr`, -DWS, -OWS, -WS)%>%
+    mutate(Scoring = ((FG2*FG2 / (FG2A +.00001)) + 1.5 *(FG3 * FG3 /(.00001 + FG3A)) + .5 * (FT * FT / (FTA + .00001))) / MP) %>%
+    mutate(Passing = (AST/MP) - 2 * (TOV/MP)) %>%
+    mutate(Rebounding =  sqrt((ORB/MP) + (DRB/MP))) %>%
+    mutate(defedit = (MPG-24)/6) %>%
+    mutate(Defense = (3*(STL) + (BLK) + .75*G*(DBPM+defedit))/MP) %>%
+    group_by(yearID) %>%
+    mutate(Scoring = (Scoring - mean(Scoring)) / sd(Scoring))%>%
+    mutate(Passing = (Passing - mean(Passing)) / sd(Passing))%>%
+    mutate(Rebounding = (Rebounding - mean(Rebounding)) / sd(Rebounding)) %>%
+    ungroup() %>%  
+    group_by(yearID, Pos) %>%
+    mutate(Defense = (Defense - mean(Defense)) / sd(Defense))%>%
+    ungroup() %>%  
+    group_by(yearID) %>%
+    mutate(Defense = (Defense - mean(Defense)) / sd(Defense)) %>%
+    ungroup %>%
+    mutate(FloStrength = .59* Scoring + .64*Defense + .11 * Passing + .077 * Rebounding) %>%
+    mutate(Value = FloStrength * MP / 400) %>%
+    arrange(-Value)
+  return(dfcomp)
+}
+
+nba22p<-getNBAplayers(2022)%>%
+  filter(yearID==2022)%>%
+  select(Player, Pos,MP, Value,yearID,Tm)
+nba23p<-getNBAplayers(2023)%>%
+  filter(yearID==2023)%>%
+  select(Player, Pos, MP,Value,yearID,Tm)
+nbap1<-full_join(nba22p,nba23p,by="Player")%>%
+  mutate(Tm.x=ifelse(is.na(Tm.x)==TRUE,"DNP",Tm.x))%>%
+  group_by(Tm.y)%>%
+  mutate(stayed=length(which(Tm.x==Tm.y)))%>%
+  slice(1)%>%
+  ungroup%>%
+  arrange(-stayed)%>%
+  na.omit%>%
+  select("Team"="Tm.y",stayed)
+nbap2<-full_join(nba22p,nba23p,by="Player")%>%
+  mutate(Tm.x=ifelse(is.na(Tm.x)==TRUE,"DNP",Tm.x))%>%
+  group_by(Tm.y)%>%
+  mutate(totMin=sum(MP.y))%>%
+  ungroup%>%
+  filter(Tm.x!=Tm.y)%>%
+  mutate(Tm.y!= "Tot")%>%
+  group_by(Tm.y)%>%
+  mutate(valAdd=sum(MP.y))%>%
+  slice(1)%>%
+  ungroup%>%
+  arrange(-valAdd)%>%
+  select("Team"="Tm.y",valAdd,totMin)%>%
+  na.omit
+
+nbap<-left_join(nbap1,nbap2,by="Team")%>%
+  mutate(NewMin=valAdd/totMin)%>%
+  mutate(is.flo=ifelse(Team=="MIA",1.2,1))
+ggplot(data = nbap,aes(x=reorder(Team, -NewMin),y=NewMin,fill=is.flo))+geom_col()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+xlab("Team")+labs(title="Percentage of MP in 2023 of players not on roster at end of 2022")
+```
+
+## The Florida Panthers
+
+The Panthers entered the off-season with their eyes on a top of the line goal scorer and leader to push them over the hump. They were willing to sacrifice some of their depth in order to get a big star, something that could hurt them in the regular season but aid them in the post season. To do this, their 3rd and 5th top performer from the previous season, Jonathan Huberdeau and MacKenzie Weegar, were traded to the Calgary Flames for star winger Matthew Tkachuk, who had finished 10th in the league in Value the year before. This trade was followed up with some smaller moves, including letting go of Claude Giroux, but the Panthers were content with their big, 100-point club addition, which was arguably the biggest move in the entire NHL off-season.
+
+```{r, echo=FALSE,warning=FALSE}
+source("/Users/seanfloersch/FloStrength/FloStrengthApp/NHLFunctions.R")
+nhlplayers<-getNHLPlayer(x)%>%
+  select(Player,Tm, Value, GP)
+nhlp22<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLPlayersAT")%>%
+  filter(yearID==2022)%>%
+  select(Player,Tm, Value, GP)
+nhlplayers<-left_join(nhlp22,nhlplayers,by="Player")
+playerslost<- nhlplayers%>%
+  filter(Tm.x!=Tm.y&Tm.x=="FLA")%>%
+  arrange(-Value.x)%>%
+  select(Player, "Old Team"="Tm.x","Value 2022"="Value.x")
+playersgained<- nhlplayers%>%
+  filter(Tm.x!=Tm.y&Tm.y=="FLA")%>%
+  arrange(-Value.x)%>%
+  select(Player, "Old Team"="Tm.x","Value 2022"="Value.x")
+players<-rbind(playersgained, playerslost)
+kable(players)
+kable(playersgained)
+```
+
+
+# The 2023 Season
+
+## The Miami Heat
+
+If you were to describe the Miami Heat season in one world, you could say disappointing, underwhelming, or just straight up bad. With hopes for a championship, the Heat team came out of the gates flat and never really got things going. They hovered around a .500 win percentage, with never having a winning nor losing streak of more than 4 games. Their two stars, however, were not too blame, with Jimmy Butler having an All-NBA season and Bam Adebayo returning as an All-Star player. Butler finished as the 4th most valuable player in the season and Adebayo at 24th highest, making them one of 4 teams with 2 top 25 players, joining the Lakers (AD and LeBron), Grizzlies (Morant and JJJ), and Suns (Booker and Durant*). This duo ranked 3 in terms of most valuable duos. However, this is where the good ended for this team, where the rest of the team ranked as the 26th deepest team. The only other teams who had a top 10 duo and bottom 10 depth were the Thunder (lost in play-in) and Mavericks (missed playoffs), putting the Heat in not-so-great company.
+
+```{r,echo=FALSE,warning=FALSE}
+url<-"https://www.basketball-reference.com/teams/MIA/2023_games.html"
+h <- read_html(url) 
+games <- (html_nodes(h, "#games .left+ td.center") %>% html_text )[1:82]
+games=ifelse(games=="W",1,0)
+winper<-c()
+for (i in c(1:82)){
+  winper[i]=mean(games[1:i])
+}
+gamenum=c(1:82)
+df<-data.frame(gamenum,winper)
+ggplot(df, aes(gamenum,winper)) + geom_line()+geom_hline(yintercept =.5)+ylim(0,1)+labs(title = "Heat Wpct over 22-23 season")+xlab("Game Number")+ylab("Win Percentage")
+topduo<-nba23p%>%
+  group_by(Tm)%>%
+  slice(1:2)%>%
+  mutate(Duo= str_c(first(Player)," & ",last(Player)))%>%
+  mutate(DuoValue=round(sum(Value),2))%>%
+  slice(1)%>%
+  ungroup()%>%
+  arrange(-DuoValue)%>%
+  select(Tm,Duo,DuoValue)%>%
+  mutate(DuoRating= c(1:30))
+depth<- nba23p%>%
+  group_by(Tm)%>%
+  slice(3:15)%>%
+  mutate(DepthValue=round(sum(Value),2))%>%
+  slice(1)%>%
+  ungroup()%>%
+  select(Tm,DepthValue)%>%
+  arrange(-DepthValue)%>%
+  mutate(DepthRating =c(1:30))
+team23<- left_join(topduo,depth, by="Tm")
+ggplot(team23, aes(reorder(Tm, -DuoValue), DuoValue,fill=DepthRating))+
+  geom_col()+ 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  xlab("Team")+labs(title = "Duo and Depth Ratings of NBA Teams")
+team23<-team23[1:10,]
+kable(team23)
+```
+
+The top heavy rotation the Heat implemented proved to be too damaging for the team success. The team finished as the 5th worst offensive team, making up for it slightly with an 8th ranked defense. Overall, the Heat finished with the 21st highest FloStrength, the only playoff team to be ranked in the bottom 10. 
+
+```{r,echo=FALSE,warning=FALSE}
+PO23 = c("MIA","ATL","PHI","BRK","CLE","NYK","MIL","BOS","DEN","MEM","SAC","MIN","LAL","GSW","LAC","PHO")
+  teams <- c("Minnesota Timberwolves" ="MIN", "Memphis Grizzlies"="MEM", "Milwaukee Bucks"="MIL", "Charlotte Hornets"="CHA", "Phoenix Suns"="PHO", "Atlanta Hawks"="ATL", "Utah Jazz"="UTA", "San Antonio Spurs"="SAS", "Brooklyn Nets"="BRK", "Denver Nuggets"="DEN", "Los Angeles Lakers"="LAL", "Boston Celtics"="BOS", "Chicago Bulls"="CHI", "Indiana Pacers"="IND", "Golden State Warriors"="GSW", "Sacramento Kings"="SAC", "Miami Heat"="MIA", "Philadelphia 76ers"="PHI", "Houston Rockets"="HOU", "Toronto Raptors"="TOR", "New Orleans Pelicans"="NOP", "Washington Wizards"="WAS", "Los Angeles Clippers"="LAC", "Dallas Mavericks"="DAL", "Cleveland Cavaliers"="CLE", "New York Knicks"="NYK", "Portland Trail Blazers"="POR", "Detroit Pistons"="DET", "Orlando Magic"="ORL", "Oklahoma City Thunder"="OKC")
+nba23<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NBATeamsAT")%>%
+  filter(yearID==2023)
+nba23$Team<- as.character(teams[nba23$Team])
+nba23<-nba23 %>%
+  mutate(po=ifelse(Team%in% PO23,"PO","Not"))%>%
+  mutate(po = ifelse(Team=="MIA","MIA",po))%>%
+  arrange(-Scoring)%>%
+  mutate(ScoringRank= c(1:30))%>%
+  arrange(-Defense)%>%
+  mutate(DefenseRank= c(1:30))%>%
+  arrange(-FloStrength)%>%
+  mutate(FSRank= c(1:30))
+
+ggplot(data = nba23,aes(x=Scoring,y=Defense,col=po,size=1.5))+geom_point()+xlab("Team")+labs(title="FloStrength of 2023 NBA Teams")+
+  geom_vline(xintercept = 0)+
+  geom_hline(yintercept = 0)
+rank23<- nba23 %>%
+  filter(po!="Not")%>%
+  mutate(Scoring = round(Scoring,2))%>%
+  mutate(Defense = round(Defense,2))%>%
+  mutate(FloStrength = round(FloStrength,2))%>%
+  select(Team, Scoring, Defense, FloStrength, ScoringRank,DefenseRank,FSRank)
+kable(rank23)
+```
+
+The team finished with a 44-38 record, clinching the highest seed for the play-in tournament. Following a loss to the Atlanta Hawks, the Heat snuck past the Chicago Bulls to earn the 8th seed and a trip to top-seeded Milwaukee, with an uphill battle for their championship dreams.
+
+## The Florida Panthers
+
+The Panthers got exactly what they wanted, swapping some of their depth for a superstar player. Matthew Tkachuk came in and put up 40 goals and 69 assists, good for being one of 11 players in the league with 100 points and one of only 3 who scored 100 points in back to back seasons, joined by Edmonton teammates McDavid and Draisaitl. This gave the Panthers a top 10 player in the league, with Tkachuk remaining as the 10th most valuable player. The superstar trade did sacrifice depth, as expected, seeing the Panthers drop from the team with the most depth, ranked by median Value, to the 12 spot. In 2022, their 10th ranked player was ranked 133 out of 863, dropping to 294 out of 839 in 2023. They had 7 players ranked in the top 75 in 2022, and in 2023 their 7th best player was ranked 254. But at least they had their star come playoff time. 
+
+```{r,echo=FALSE,warning=FALSE}
+nhlplayers<-getNHLPlayer(x)
+nhl23<-nhlplayers%>%
+  group_by(Tm)%>%
+  mutate(DepthRating=median(Value))%>% 
+  ungroup()%>% 
+  arrange(-DepthRating)%>%
+  mutate(is.flo=ifelse(Tm=="FLA",1.5,1))
+top10<- nhl23 %>%
+  arrange(-Value)%>%
+  slice(1:10)%>%
+  select(Player, Tm, Pos,Value)
+kable(top10)
+ggplot(data = nhl23,aes(x=reorder(Tm, -DepthRating),y=Value,col=is.flo))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+xlab("Team")+labs(title="Value of 2023 NHL Players by Team")
+nhl23<-nhl23%>%
+  arrange(-Value)%>%
+  group_by(Pos)%>%
+  mutate(PosRank=c(1:length(Player)))%>%
+  ungroup%>%
+  mutate(OvrRank=c(1:length(Player)))%>%
+  filter(Tm=="FLA")%>%
+  select("Name"=Player,Pos, FloStrength, Value, PosRank,OvrRank)%>%
+  slice(1:10)
+```
+
+Finishing with 42-32-8 record, with those 92 points being just ahead of the 91 by the Penguins and Sabres and sneaking into the playoffs as the 8th seed in the East. Tkachuk kept the Panthers offense elite, with the team remaining as the top offensive team in the league. Their lack of depth was especially seen on defense, however, checking in at number 20 in this metric. Overall, the Panthers finished with a .529 FloStrength, down from .643 from a year previous, good for the 4th largest drop in the league. With a trip to 1-seed Boston, who had just clinched the best record in NHL history and the 9th best FloStrength of all-time, the Panthers would need to rely on their top ranked offense if they wanted to make a deep postseason run.
+
+```{r, echo=FALSE,warning=FALSE}
+nhl23<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLTeamsAT")%>%
+  filter(yearID==2023)%>%
+  mutate(is.flo=ifelse(Team=="FLA",1.5,1))
+nhl22<-read.csv("/Users/seanfloersch/FloStrength/FloStrengthHistoryApp/NHLTeamsAT")%>%
+  filter(yearID==2022)
+nhl<-left_join(nhl22,nhl23, by = "Team")%>%
+  mutate(change=FloStrength.y-FloStrength.x)
+ggplot(nhl23, aes(Offense, Defense,col=is.flo, size =1.2))+geom_point()+
+  theme(legend.position="none")+ylab("Defense")+xlab("Offense")+labs(title="NHL Team Metrics 2023")+geom_hline(yintercept = 0)+geom_vline(xintercept = 0)
+
+ggplot(nhl, aes(reorder(Team, change), fill=is.flo, change))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  theme(legend.position="none")+ylab("Change in FloStrength")+xlab("Team")+labs(title="Change in FloStrength between 2022 and 2023")
+```
+
+
+# The Playoff Run
+
+## Miami Heat
+
+The Miami Heat scratched their way into a first round playoff series versus the 2021 NBA Champion Milwaukee Bucks, led by 2-time MVP Giannis Antentokounmpo.  To make matters worse, the Heat, who only had 5 players register a positive FloValue, lost two of those players in the first two games of the playoffs, with Tyler Herro and Victor Oladipo going down with extended injuries. This placed an increased pressure on the role players, who in the regular season were not exceptional. With an 8-man rotation, half of these players were undrafted. Pair that underdog mentality with a player like Jimmy Butler, and the 8-seeded Heat had players that thrived in situations where they were counted out. This never-say-never mentality pushed the team to new heights, seeing the Heat role players step up. The undrafted trio of Gabe Vincent, Duncan Robinson, and Caleb Martin all saw large increases in their Effective Scoring, all ranking in the top 15 in effScr change, even while the average playoff performer typically drops in this category due to the higher intensity.  
+
+```{r,echo=FALSE, warning=FALSE}
+url<-"https://www.basketball-reference.com/playoffs/NBA_2023_per_game.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/29
+df<- data.frame(matrix(nrow=players,ncol=29))
+for (i in c(1:players)) {
+  for (j in c(1:29)) {
+    df[i,j]=stats[j + (i-1)*29]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:30]
+for (i in c(3,5:29)){
+  df[,i]=as.numeric(df[,i])
+}
+dfpo<- df %>%
+  filter(MP>14 & G>3)%>%
+  mutate(is.flo=ifelse(Tm =="MIA",1,0))
+ggplot(dfpo, aes(PTS,`eFG%`, col=is.flo))+geom_point()+
+  theme(legend.position="none")+labs(title = "Efficient Shooting % vs Pts Scored in 23 Playoffs")
+url<-"https://www.basketball-reference.com/leagues/NBA_2023_per_game.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/29
+df<- data.frame(matrix(nrow=players,ncol=29))
+for (i in c(1:players)) {
+  for (j in c(1:29)) {
+    df[i,j]=stats[j + (i-1)*29]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:30]
+for (i in c(3,5:29)){
+  df[,i]=as.numeric(df[,i])
+}
+df<- df %>%
+  filter(MP>14 & G>15)
+dfnba<-left_join(dfpo,df, by = c("Player","Tm"))%>%
+  na.omit()%>%
+  mutate(effScoring.x= PTS.x*`eFG%.x`)%>%
+  mutate(effScoring.y= PTS.y*`eFG%.y`)
+scoringChange=dfnba %>%
+  mutate(change= effScoring.x-effScoring.y)%>%
+  mutate(rebchange=TRB.x-TRB.y)%>%
+  select(change,rebchange, Player, Tm)
+points<- c(3.6,1.9,1.3,1.2,1,.8,.5,.4,.3,-1.4,-2,-2,-2.5,-4.6,-7.8,-11)
+teams<-c("MIA","LAL","DEN","NYK","SAC","LAC","PHI","BOS","ATL","PHO","CLE","MEM","GSW","MIN","BKN","MIL")
+df<-data.frame(teams,points)%>%
+  mutate(is.flo=ifelse(teams=="MIA",1,0))
+colnames(df)=c("Team","FQPD","is.flo")
+ggplot(df, aes(reorder(Team,-FQPD),FQPD,fill=is.flo))+geom_col()+
+  theme(legend.position="none")+ylab("4Q PD")+labs(title = "4Q PD in 2023 Playoffs")+xlab("Team")
+```
+
+
+## Florida Panthers
+
+```{r,echo=FALSE, warning=FALSE,include=FALSE}
+#### GoalKeepers
+url<-"https://www.hockey-reference.com/playoffs/NHL_2023_goalies.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/24
+df<- data.frame(matrix(nrow=players,ncol=24))
+for (i in c(1:players)) {
+  for (j in c(1:24)) {
+    df[i,j]=stats[j + (i-1)*24]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:24]
+for (i in c(2,4:24)){
+  df[,i]=as.numeric(df[,i])
+}
+dfpo<-df[,1:15,]%>%
+  mutate(Goalkeeping = 20000*(GA*(GA/SA))/MIN)%>%
+  mutate(SvPG= SV/GP)%>%
+  filter(MIN>120)%>%
+  select(Player,Tm, SvPG, Goalkeeping, `SV%`,GAA)
+
+url<-"https://www.hockey-reference.com/leagues/NHL_2023_goalies.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/25
+df<- data.frame(matrix(nrow=players,ncol=25))
+for (i in c(1:players)) {
+  for (j in c(1:25)) {
+    df[i,j]=stats[j + (i-1)*25]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:25]
+for (i in c(2,4:25)){
+  df[,i]=as.numeric(df[,i])
+}
+df<-df[,1:16,]%>%
+  mutate(Goalkeeping = 20000*(GA*(GA/SA))/MIN)%>%
+  mutate(SvPG= SV/GP)%>%
+  filter(GP>10)%>%
+  select(Player,Tm, SvPG, Goalkeeping, `SV%`,GAA)
+dfgk<-left_join(df, dfpo, by = c("Player","Tm"))%>%
+  na.omit()%>%
+  mutate(Change=Goalkeeping.y-Goalkeeping.x)%>%
+  select(Player,Tm, Change, Goalkeeping.y, SvPG.y, GAA.y)%>%
+  arrange(Change)%>%
+  slice(1:10)
+colnames(dfgk)=str_remove(colnames(dfgk),"\\.y")
+kable(dfgk)
+url<-"https://www.hockey-reference.com/playoffs/NHL_2023_skaters.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/26
+df<- data.frame(matrix(nrow=players,ncol=26))
+for (i in c(1:players)) {
+  for (j in c(1:26)) {
+    df[i,j]=stats[j + (i-1)*26]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:27]
+for (i in c(2,5:26)){
+  df[,i]=as.numeric(df[,i])
+}
+dfpo<- df[1:20] %>%
+  filter(TOI>75)%>%
+  mutate(GoalRate=G /GP)%>%
+  mutate(PlusMin=`+/-` /GP)%>%
+  mutate(PtsRate=PTS/GP)%>%
+  select(Player,Tm, Age,GP,GW,TOI,G,PTS,GoalRate, PlusMin, PtsRate)%>%
+  mutate(MinPerGame=TOI/GP)%>%
+  mutate(is.flo=ifelse(Tm=="FLA",1.5,1))
+
+url<-"https://www.hockey-reference.com/leagues/NHL_2023_skaters.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, "td") %>% html_text )
+players=length(stats)/27
+df<- data.frame(matrix(nrow=players,ncol=27))
+for (i in c(1:players)) {
+  for (j in c(1:27)) {
+    df[i,j]=stats[j + (i-1)*27]
+  }
+}
+colnames(df)=(html_nodes(h, ".poptip") %>% html_text )[2:28]
+for (i in c(5:27)){
+  df[,i]=as.numeric(df[,i])
+}
+dfreg<- df[1:21] %>%
+  filter(TOI>400)%>%
+  mutate(GoalRate=G /GP)%>%
+  mutate(PlusMin=`+/-` /GP)%>%
+  mutate(PtsRate=PTS/GP)%>%
+  select(Player,Tm, Age,GP,GW,TOI,G,PTS,GoalRate, PlusMin, PtsRate)%>%
+  mutate(MinPerGame=TOI/GP)
+
+df<- left_join(dfreg,dfpo, by = c("Player","Tm"))%>% na.omit()%>%
+  mutate(MinChange= MinPerGame.y-MinPerGame.x)%>%
+  mutate(PtsChange= PlusMin.y-PlusMin.x)
+changeMin<- df%>%
+  arrange(-PtsRate.x)%>%
+  group_by(Tm)%>%
+  slice(1:10)%>%
+  mutate(PtsChange=mean(PtsChange))%>%
+  mutate(MinChange=mean(MinChange))%>%
+  mutate(POMin= mean(MinPerGame.y))%>%
+  slice(1)
+ggplot(changeMin, aes(reorder(Tm,-POMin),fill=MinChange,POMin))+geom_col()+xlab("Team")
+ggplot(dfpo, aes(MinPerGame, PtsRate,col=is.flo))+geom_point()+xlab("Minutes Per Game")+ylab("Points Per Game")+
+  theme(legend.position="none")
+dfpo<- dfpo%>%
+  arrange(-GW)%>%
+  slice(1:10)
+url<-"https://www.hockey-reference.com/playoffs/NHL_2023.html"
+h <- read_html(url) 
+stats <- (html_nodes(h, ".right , #teams td") %>% html_text )
+df<- data.frame(matrix(nrow=17,ncol=12))
+for (i in c(1:17)) {
+  for (j in c(1:12)) {
+    df[i,j]=stats[j + (i-1)*12]
+  }
+}
+colnames(df)=(html_nodes(h, "#teams .poptip") %>% html_text )
+df<-df[1:16,]
+for (i in c(3:12)){
+  df[,i]=as.numeric(df[,i])
+}
+df<- df%>%
+  mutate(OTWpct= OW/(OW+OL))%>%
+  mutate(is.flo=ifelse(Team=="Florida Panthers",1,0))
+df[,2]=c("VEG","FLA","DAL","CAR","SEA","EDM","TOR","NJD","BOS","COL","NYR","NYI","MIN","LAK","TBL","WIN")
+ggplot(df,aes(DIFF,W,col=is.flo,size =1.2))+geom_point()+
+  theme(legend.position="none")+xlab("Point Differential")+ylab("Wins")+labs(title = "2023 NHL Playoff Teams Wins and PD")
+ggplot(df,aes(reorder(Team,-OW),OW, fill=OTWpct))+geom_col()+xlab("Team")+ylab("OT Wins")+labs(title = "2023 NHL Playoff Teams Overtime Results")
+```
+

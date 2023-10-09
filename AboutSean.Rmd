@@ -1,0 +1,490 @@
+---
+title: "About"
+author: "Sean Floersch"
+output: 
+html_document: 
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    theme: cosmo
+---
+
+<body style="background-color:lightgrey;">
+
+<style type="text/css">
+
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+  text-align: center;
+}
+h4.author { /* Header 4 - and the author and data headers use this too  */
+    font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkRed;
+  text-align: center;
+}
+h4.date { /* Header 4 - and the author and data headers use this too  */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+  text-align: center;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(rvest)
+library(tidyverse)
+library(optmatch)
+library(stringr)
+library(reactable)
+```
+
+Hello whoever has stumbled to this page,
+
+My name is Sean Floersch and I am from Eagan, Minnesota, USA. I was born and raised just outside of the Twin Cities, where I grew up on sports and math. I hope you enjoy learning more about me below! 
+
+# {.tabset .tabset-fade .tabset-pills}
+
+
+## Education
+
+<center>
+
+![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/BurnsvilleBlaze.png){width=30%}
+
+Burnsville, MN
+
+2016-2020
+
+GPA: 4.00
+
+High School
+
+![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/lax.png){width=30%}
+
+La Crosse, WI      
+
+2020-2023
+
+GPA: 3.97
+
+B.S. Statistics, B.A. Spanish
+
+<center>
+
+<br>
+
+## Work Experiance
+
+```{r chunkname, echo=FALSE, out.width= "30%", out.extra='style="float:right; padding:10px"'}
+knitr::include_graphics("/Users/seanfloersch/FloStrength/FloStrengthApp/img/lax.png")
+```
+
+**Undergraduate Researcher**
+
+  - September 2020-May 2023
+  - Under Dr. Chad Vidden
+  - Eagle Apprenticeship
+      * 2020-2022
+      * Learned R and Python
+      * Learned how to write up/ present results
+      * Learned how to analyze literature
+      * Linear models
+  - Dean's Distinguished Fellowship 
+      * Summer 2021
+      * Worked with Mayo Clinic 
+      * Analyzed fitness tracking data in Division III Women's Soccer
+      * Statistical testing
+      * Data wrangling
+  - Wine and Bange's Research Grant
+      * 2022-2023 
+      * Explored machine learning techniques using personalized metrics to predict sport outcomes
+      * Logistic Regression, SVM, GBM, Neural Networks, and Random Forest
+      * NBA, MLB, NHL, NFL, and NCAAMB statistical work
+
+**Brugger's Bagels**
+
+  - January 2018-January 2022
+  - Baker, cashier, and training team lead
+  - Teamwork
+  - Leadership
+  - In-and-outs of a workplace
+  - Punctuality
+  - Organizational skills
+
+**Burnsville Travelling Baseball**
+  
+  - May 2021-August 2021
+  - Assistant Coach for 15AAA
+  - 3rd Place in State
+  - Leadership
+
+<br>
+
+## Life Experiance
+
+I am only 21, but I still have had my fair share of life experiances!
+
+  - **2008** Family trip to Ireland
+  - **2014** Diagnosed with cancer (Ewing's Sarcoma) and sentanced to 10 months of chemotherapy and surgery to remove 3 ribs (and a tumor)
+  - **2015** Cancer free!
+  - **2017** Made varsity soccer team at Burnsville High School
+  - **2018** Made All-Conference team as goalkeeper at BHS
+  - **2019** Won Yale Book Award and ExCel award as recognition for being excellent junior student-athlete
+  - **2019** Made varsity baseball team as a pitcher at BHS and threw a no-hitter in 2nd varsity start
+  - **2020** Gave graduation speech for Burnsville's Class of 2020, also known as the Covid class
+  - **2022** Travelled abroad in Granada, Spain
+  
+<br>
+
+
+## Skills
+
+### **Spanish**
+
+  - 8 years of Spanish Classes
+  - Tested 8/9 on Spanish Proficiency Test (Advanced Speaker and Writer)
+
+### **Coding**
+
+  - R, Java, Python, SQL
+  - Able to learn independently
+  - CS 120 (Java) and Stat 345 (R) classes 
+
+### **Modelling**
+
+  - Data transformations
+  - Significance testing
+  - Linear models
+  - Time series
+
+### **Mathematical Techniques**
+
+  - Through Calculus III (multidimensional calculus)
+      * Integrals, Summations, Derivatives, Vectors
+  - Linear Algebra
+      * Laws of Matrices
+      * Least Squares Regression
+  - Mathematical Statistics
+      * Probability, ANOVA, unbiased estimators, statistical proofs
+
+### **Machine Learning**
+
+  - Logistic, Random Forest, SVM, GBM, Neural Networks
+  - Avoiding Bias
+  - Thresholds
+  - Clipping
+  - Cross validation
+  - Train/Test data separation
+
+### **Statistical Analysis/Testing**
+
+  - ANOVA, T-Tests, Z-Tests
+  - Type I and Type II Errors
+  - Multiple variable model significance
+
+### **Experimental Design**
+
+  - Randomized block
+  - Observational 
+  - Covariance
+  - Ethics
+  - Surverys
+  - Descriptive/Inerential/Predictive
+  - Data collection processes
+  - Avoiding bias
+
+### **Data Wrangling/Cleaning**
+
+  - SQL
+  - Working with large data frames
+  - Correlated variables
+  - Lag variables
+  
+### **Presentation methods**
+
+  - Academic papers
+  - Poster presentations
+  - Power points
+  - Speeches
+  
+### **Personality skills**
+
+  - Independently motivated
+  - Leadership
+  - Organization
+  - Perfectionist
+  - Creativitity 
+
+<br>
+  
+## Goals
+
+  - Personal
+    * Be a husband
+    * Be a father
+    * Have dogs
+  - Work
+    * Work for professional sports team
+    * Start non profit to help children battling cancer
+    * Create a usable metric to analyze player and team value in sports
+  - Hobbies
+    * Join PDGA Disc Golf tournaments
+    * Travel through South America
+<br>
+
+
+## Interests{.tabset}
+
+<br>
+
+### Sports
+
+Here is a list of championships I have watched from Minnesota teams since I was born:
+
+  1.
+  2.
+  
+Favorite Sports:
+
+  * Baseball
+    - Favorite MLB Team: Minnesota Twins
+    - Favorite Players : Luis Arraez, Clayton Kershaw
+  * Soccer
+    - Favorite La Liga Team: FC Barcelona
+    - Favorite EPL Team: Chelsea
+    - Favorite MLS Team: Minnesota United
+    - Favorite Players : Lionel Messi, Christian Pulisic
+  * Basketball
+    - Favorite NBA Team: Minnesota Timberwolves
+    - Favorite NCAA Team: Minnesota Vikings and Michigan Wolverines
+    - Favorite Players : Anthony Edwards, Tyrese Haliburton
+  * Football
+    - Favorite NFL Team: Minnesota Vikings
+    - Favorite NCAA Team: Minnesota Gophers
+    - Favorite Playesr : Justin Jefferson, Joe Burrow
+  * Hockey
+    - Favorite NHL Team: Minnesota Wild
+    - Favorite Player : Kirill Kaprizov
+
+
+### TV
+
+<center>
+
+#### **10.** MARVEL Agents of S.H.I.E.L.D. *2013-2020*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/agentsofshield.jpeg){width=30%}
+  
+
+#### **9.** Modern Family *2009-2020*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/modernfamily.jpeg){width=30%}
+  
+
+#### **8.**  You *2018-*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/you.jpeg){width=30%}
+  
+
+#### **7.** Grey's Anatomy *2005-*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/greys.jpeg){width=30%}
+  
+
+#### **6.** La Casa de Papel *2017-2021*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/lacasa.jpeg){width=30%}
+  
+
+#### **5.** The Office *2005-2013*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/theoffice.jpeg){width=30%}
+  
+
+#### **4.** Dexter *2006-2013*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/dexter.jpeg){width=30%}
+  
+
+#### **3.** Suits *2011-2019*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/suits.jpeg){width=30%}
+  
+
+
+#### **2.** Parks and Recreation *2009-2015*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/parksandrec.jpeg){width=30%}
+  
+
+#### **1.** Psych *2006-2014*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/psych.jpeg){width=30%}
+  
+### Movies
+
+<center>
+
+#### **10.** A Man Named Otto *2022*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/otto.jpeg){width=30%}
+
+#### **9.** Ocean's 11 *2001*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/oceans11.jpeg){width=30%}
+
+#### **8.** Harry Potter and the Goblet of Fire *2005*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/harrypotter.jpeg){width=30%}
+  
+
+#### **7.** Shutter Island *2010*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/shutterisland.jpeg){width=30%}
+  
+
+#### **6.** 21 *2008*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/21.jpeg){width=30%}
+  
+
+#### **5.** Shawshank Redemption *1994*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/shawshank.jpeg){width=30%}
+  
+
+#### **4.** Moneyball *2011*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/moneyball.jpeg){width=30%}
+
+#### **3.** Inception *2010*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/inception.jpeg){width=30%}
+  
+
+#### **2.** The Martian *2015*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/martian.jpeg){width=30%}
+  
+
+#### **1.** Pitch Perfect *2012*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/pitchperfect.jpeg){width=30%}
+  
+
+### Videogames
+
+Favorite Video Games, Ranked:
+  
+  <center>
+
+#### **10.** MLB 2K12 *(Wii)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/mlb2k12.jpeg){width=30%}
+  
+  <center>
+  
+#### **9.** Fifa 20 *(PS4)*
+  
+   <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/fifa20.jpeg){width=30%}
+  <center>
+  
+#### **8.** NBA 2k22 *(Xbox Series S)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/nba2k22.jpeg){width=30%}
+  <center>
+  
+  
+#### **7.** Madden 18 *(Xbox 1)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/madden19.jpeg){width=30%}
+  
+  <center>
+  
+  
+#### **6.** Super Mario Bros *(Wii)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/smb.jpeg){width=30%}
+  <center>
+  
+  
+#### **5.** Mario Kart *(Wii)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/mariokart.jpeg){width=30%}
+  <center>
+  
+  
+#### **4.** Minecraft *(Xbox 360, PS4)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/minecraft.jpeg){width=30%}
+  <center>
+  
+  
+#### **3.** Wii Sports Resort *(Wii)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/wiisports.jpeg){width=30%}
+  <center>
+  
+  
+#### **2.** NCAA Football 12 *(Xbox 360)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/ncaafootball12.jpeg){width=30%}
+  <center>
+  
+  
+#### **1.** Fortnite *(Xbox Series S)*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/fortnite.jpeg){width=30%}
+  <center>
+  
+  
+### Music
+
+Top Albums:
+
+<center>
+
+#### **5.** Divide *Ed Sheeran, 2017*
+  
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/edsheeran.png){width=30%}
+
+#### **4.** The Search *NF, 2019*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/nf.png){width=30%}
+  <center>
+  
+#### **3.** Me and My Gang *Rascal Flatts, 2006*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/rascallflatts.jpeg){width=30%}
+  <center>
+  
+#### **2.** Dangerous *Morgan Wallen, 2021*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/morganwallen.jpeg){width=30%}
+  <center>
+  
+#### **1.** American Heartbreak *Zach Bryan, 2022*
+  
+  <center>
+  ![](/Users/seanfloersch/FloStrength/FloStrengthApp/img/zachbryan.png){width=30%}
+  <center>
+
+
